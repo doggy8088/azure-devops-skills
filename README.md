@@ -35,7 +35,52 @@
 
 ---
 
+## 📦 安裝
+
+最簡單的方式是用 [`skills`](https://www.npmjs.com/package/skills) CLI 安裝（需要 Node.js）。它會找出這個儲存庫 `.agents/skills/` 底下的所有 Skills，裝到你目前的專案，並自動連結到你使用的 AI 代理工具：
+
+```bash
+npx skills add doggy8088/azure-devops-skills
+```
+
+執行後會以互動方式讓你選擇要安裝哪些 Skills、裝給哪些代理工具。常用參數：
+
+```bash
+# 先列出可安裝的 Skills，不實際安裝
+npx skills add doggy8088/azure-devops-skills --list
+
+# 安裝全部 Skills，略過確認提示
+npx skills add doggy8088/azure-devops-skills --skill '*' -y
+
+# 只安裝部分 Skills
+npx skills add doggy8088/azure-devops-skills --skill boards-my-work boards-work-item-summary
+
+# 指定要安裝給哪些代理工具（例如 Claude Code、Codex、GitHub Copilot）
+npx skills add doggy8088/azure-devops-skills --agent claude-code codex github-copilot
+
+# 安裝到使用者層級，讓所有專案共用
+npx skills add doggy8088/azure-devops-skills -g
+```
+
+安裝到專案時，Skills 會放在 `./.agents/skills/<skill-name>/`；需要讀取其他目錄的代理工具（例如 Claude Code 的 `.claude/skills/`）會以 symlink 連過去，加上 `--copy` 則改為複製檔案。安裝來源會記錄在 `skills-lock.json`。
+
+之後的維護指令：
+
+```bash
+npx skills list      # 列出已安裝的 Skills
+npx skills update    # 更新到最新版
+npx skills remove    # 以互動方式移除
+```
+
+> 💡 `--skill '*'` 的星號要加引號，避免被 shell 展開成檔名。
+
+不想使用 Node.js 的話，也可以直接把需要的 `.agents/skills/<skill-name>/` 資料夾複製到你的專案或代理工具的 Skills 目錄。
+
+---
+
 ## 🔐 前置需求
+
+以下是 Skills 執行時的需求（與安裝方式無關）：
 
 1. 安裝 `curl`（macOS、Linux 與 Windows 10 以上都已內建；在 Windows PowerShell 請呼叫 `curl.exe`）。
 2. 到 `https://dev.azure.com/{organization}/_usersSettings/tokens` 建立 Personal Access Token（PAT），勾選上表所需的權限範圍。
@@ -67,10 +112,8 @@ export AZURE_DEVOPS_TOKEN="$(az account get-access-token --resource 499b84ac-132
 
 ## 💻 使用方式
 
-1. 讓你的 AI 代理載入 `.agents/skills/` 底下的 Skills：
-   - 支援專案層級 `.agents/skills/` 的代理，直接在此儲存庫（或複製了這個資料夾的專案）中啟動即可。
-   - 其他代理請把需要的 Skill 資料夾複製或建立 symlink 到該工具的 Skills 目錄。
-2. 確認已設定上一節的環境變數。
+1. 依「安裝」一節把 Skills 裝進你的專案。
+2. 確認已設定「前置需求」一節的環境變數。
 3. 用自然語言描述需求，例如：
    - 「列出 Contoso 專案的 Iteration」
    - 「摘要工作項目 115770」
@@ -111,4 +154,6 @@ export AZURE_DEVOPS_TOKEN="$(az account get-access-token --resource 499b84ac-132
 
 ## 📜 來源與授權
 
-本專案改寫自 [microsoft/azure-devops-skills](https://github.com/microsoft/azure-devops-skills)（MIT License，Copyright (c) Microsoft Corporation）。原專案的 Skills 依賴 GitHub Copilot 與 Azure DevOps MCP 伺服器；本專案改為直接呼叫 REST API，並改放在 `.agents/skills/`。散布或修改時，請保留原專案的 MIT 授權聲明。
+本專案以 [MIT License](LICENSE) 授權，Copyright © 2026 Will 保哥。
+
+本專案改寫自 [microsoft/azure-devops-skills](https://github.com/microsoft/azure-devops-skills)（MIT License，Copyright © Microsoft Corporation）。原專案的 Skills 依賴 GitHub Copilot 與 Azure DevOps MCP 伺服器；本專案改為直接呼叫 REST API，並改放在 `.agents/skills/`。依 MIT 授權條款，`LICENSE` 同時保留原專案的著作權聲明。
