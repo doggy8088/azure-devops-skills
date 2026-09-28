@@ -1,6 +1,6 @@
 ---
 name: security-alert-review
-description: 以 Azure DevOps REST API 列出與檢視儲存庫的 Advanced Security 警示：相依套件弱點、機密外洩與程式碼掃描結果，可依嚴重性、狀態與警示類型篩選，也能產生總覽。當使用者想查看、篩選、摘要安全性警示，或深入了解某一則警示時使用。
+description: 以 Azure DevOps REST API 列出與檢視儲存庫的 Advanced Security 警示：相依套件弱點、機密外洩與程式碼掃描結果，可依嚴重性、狀態與警示類型篩選，也能產生總覽。當使用者想查看、篩選、摘要安全性警示，或深入了解某一則警示時使用。要檢查哪些儲存庫尚未啟用 Advanced Security 改用 `security-enablement-audit`。
 compatibility: 需要 curl、可連線至 dev.azure.com 與 advsec.dev.azure.com 的網路，以及 AZURE_DEVOPS_ORG 與 AZURE_DEVOPS_PAT 環境變數；儲存庫需已啟用 Advanced Security。
 ---
 
@@ -34,14 +34,15 @@ compatibility: 需要 curl、可連線至 dev.azure.com 與 advsec.dev.azure.com
 
 ## 連線與驗證
 
-一律用 `curl` 直接呼叫 Azure DevOps REST API，每個指令都自帶驗證參數。警示 API 的主機是 `advsec.dev.azure.com`，其餘 API 是 `dev.azure.com`。
+一律用 `curl` 直接呼叫 Azure DevOps REST API，每個指令都自帶驗證參數。
 
 - **組織**：讀取環境變數 `AZURE_DEVOPS_ORG`（組織名稱，例如 `contoso`）。未設定時詢問使用者一次；使用者給的是網址時，從 `https://dev.azure.com/{org}` 或 `https://{org}.visualstudio.com` 取出組織名稱。
+- **主機**：除了 `dev.azure.com`，Advanced Security 警示 API 的主機是 `advsec.dev.azure.com`。
 - **權杖**：PAT 以 Basic 驗證送出：`-u ":$AZURE_DEVOPS_PAT"`；只設定了 `AZURE_DEVOPS_EXT_PAT`（Azure CLI azure-devops 擴充套件使用的變數）時，改用它。改用 Microsoft Entra ID 權杖時，換成 `-H "Authorization: Bearer $AZURE_DEVOPS_TOKEN"`。都未設定時，請使用者在自己的終端機設定 `AZURE_DEVOPS_PAT` 後重試，並停止。權杖只從環境變數讀取：不要請使用者把權杖貼進對話，也不要印出或寫入檔案。
 - **PAT 權限範圍**：Advanced Security (Read)、Code (Read)、Project and Team (Read)。
 - **編碼**：路徑中的專案與儲存庫名稱要 URL 編碼（空白寫成 `%20`）；查詢字串中的 `$` 寫成 `%24`（例如 `%24top`），避免被 shell 展開。
-- **錯誤**：HTTP 401、203 或回應是 HTML 登入頁，代表權杖無效、過期或權限不足，回報後停止；HTTP 404 代表組織、專案或儲存庫名稱有誤。回應訊息含 `VS2150009` 代表這個儲存庫沒有啟用 Advanced Security，告知使用者後停止。
-- **Windows PowerShell**：呼叫 `curl.exe`（而非 `curl` 別名），環境變數寫成 `$env:AZURE_DEVOPS_PAT`。
+- **錯誤**：HTTP 401、403、203 或回應是 HTML 登入頁，代表權杖無效、過期或權限不足，回報後停止；HTTP 404 代表組織、專案或儲存庫名稱有誤。回應訊息含 `VS2150009` 代表這個儲存庫沒有啟用 Advanced Security，告知使用者後停止。
+- **Windows PowerShell**：呼叫 `curl.exe`（而非 `curl` 別名），環境變數寫成 `$env:AZURE_DEVOPS_PAT`；PowerShell 不支援 `<<'EOF'`，先把 JSON 主體寫入暫存檔，再以 `--data-binary "@body.json"` 送出。
 
 ## 查詢參數
 

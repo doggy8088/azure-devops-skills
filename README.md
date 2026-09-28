@@ -17,21 +17,60 @@
 └── skills/
     └── <skill-name>/
         └── SKILL.md    # Skill 的中繼資料（frontmatter）與操作指示
+docs/
+└── research/           # 撰寫 Skills 時的研究筆記（官方最佳實踐與 API 查證）
 ```
 
 ---
 
 ## 🧩 可用的 Skills
 
-| Skill | 用途 | 需要的 PAT 權限範圍 |
-|---|---|---|
-| `boards-backlog-summary` | 取得團隊需求層級待辦清單中，指派給目前使用者的進行中項目，附父子階層並依優先順序排序 | Work Items (Read)、Project and Team (Read) |
-| `boards-my-work` | 列出指派給目前使用者、尚未完成的工作項目，依類型分組 | Work Items (Read)、Project and Team (Read) |
-| `boards-team-active-work` | 取得整個團隊進行中的項目，呈現阻擋關係、優先順序與 Sprint 歸屬 | Work Items (Read)、Project and Team (Read) |
-| `boards-work-item-summary` | 摘要單一工作項目，含連結、Pull Request 與留言 | Work Items (Read)、Code (Read) |
-| `pipelines-build-summary` | 列出、檢視與排查 Pipeline 建置，含失敗步驟記錄檔與變更清單 | Build (Read)、Project and Team (Read) |
-| `security-alert-review` | 列出與檢視 Advanced Security 警示（相依套件弱點、機密外洩、程式碼掃描） | Advanced Security (Read)、Code (Read)、Project and Team (Read) |
-| `work-iterations` | 列出、建立 Iteration，並指派給團隊 | Work Items (Read & write)、Project and Team (Read) |
+共 23 個 Skills，分成四類。「讀／寫」欄標示是否會修改 Azure DevOps 的資料；會寫入的 Skill 一律先把變更內容列給你確認，能乾跑的先乾跑。每個 Skill 的完整權限說明寫在各自 `SKILL.md` 的「連線與驗證」段落。
+
+### Boards
+
+| Skill | 用途 | 讀／寫 | PAT 權限範圍 |
+|---|---|---|---|
+| `boards-my-work` | 列出指派給目前使用者、尚未完成的工作項目，依類型分組 | 讀 | Work Items (Read)、Project and Team (Read) |
+| `boards-work-item-summary` | 摘要單一工作項目，含連結、Pull Request 與留言 | 讀 | Work Items (Read)、Code (Read) |
+| `boards-work-item-write` | 建立、拆解（子 Task）、更新工作項目與留言，先以 `validateOnly` 乾跑 | 寫 | Work Items (Read & write) |
+| `boards-query` | 執行臨時 WIQL 或已儲存的查詢 | 讀 | Work Items (Read)、Project and Team (Read) |
+| `boards-backlog-summary` | 團隊待辦清單中指派給我的進行中項目，附父子階層 | 讀 | Work Items (Read)、Project and Team (Read) |
+| `boards-team-active-work` | 整個團隊進行中的項目，呈現阻擋關係、優先順序與 Sprint 歸屬 | 讀 | Work Items (Read)、Project and Team (Read) |
+| `work-iterations` | 列出、建立 Iteration，並指派給團隊 | 讀／寫 | Work Items (Read & write)、Project and Team (Read) |
+
+### Repos 與 Wiki
+
+| Skill | 用途 | 讀／寫 | PAT 權限範圍 |
+|---|---|---|---|
+| `repos-pull-request-review` | 審查端：待我審查的 PR、變更與 diff、討論串、投票、被擋原因、由 commit 反查 PR；確認後留言或投票 | 讀／寫 | Code (Read & write)、Work Items (Read)、Identity (Read) |
+| `repos-pull-request-write` | 作者端：從目前分支建立 PR、發布 draft、加審查者、設定 auto-complete、放棄 PR | 寫 | Code (Read & write)、Work Items (Read)、Identity (Read) |
+| `repos-code-search` | 跨儲存庫搜尋程式碼、讀取特定分支的檔案與目錄、搜尋 commit | 讀 | Code (Read) |
+| `wiki-pages` | 搜尋、讀取、建立與更新 Wiki 頁面（ETag 防止覆寫） | 讀／寫 | Wiki (Read & write) |
+
+### Pipelines 與測試
+
+| Skill | 用途 | 讀／寫 | PAT 權限範圍 |
+|---|---|---|---|
+| `pipelines-build-summary` | 列出、檢視與排查建置，含失敗步驟記錄檔與變更清單 | 讀 | Build (Read)、Project and Team (Read) |
+| `pipelines-run` | 以分支、參數、變數觸發 Pipeline（先以 `previewRun` 乾跑）、追蹤到完成、取消建置 | 寫 | Build (Read & execute) |
+| `pipelines-approvals` | 列出等待我（或我所屬群組）核准的部署，確認後核准或拒絕 | 讀／寫 | Build (Read & execute)、Pipeline Resources (Use)、Identity (Read) |
+| `pipelines-release-notes` | 彙整兩次建置之間的 commit、PR 與工作項目，產出版本說明 | 讀 | Build (Read)、Code (Read)、Work Items (Read) |
+| `pipelines-test-results` | 某次建置的自動化測試結果、失敗測試與錯誤訊息 | 讀 | Test Management (Read)、Build (Read) |
+| `test-plans-progress` | Test Plan 與 Suite 的手動測試執行進度 | 讀 | Test Management (Read)、Project and Team (Read) |
+
+### 最佳實踐稽核與報告
+
+| Skill | 用途 | 讀／寫 | PAT 權限範圍 |
+|---|---|---|---|
+| `repos-branch-policy-audit` | 比對每個儲存庫預設分支的原則與 Microsoft 建議基準 | 讀 | Code (Read)、Project and Team (Read) |
+| `pipelines-security-audit` | 檢查 Pipeline 安全設定、服務連線驗證方式、開放給所有 Pipeline 的受保護資源與 checks | 讀 | Project and Team、Build、Service Connections、Variable Groups、Agent Pools、Secure Files、Code（皆 Read） |
+| `boards-backlog-audit` | 找出缺估點、缺允收條件、沒有父項目、沒有開發連結的項目，以及預先排好的 Sprint 不足 | 讀 | Work Items (Read)、Project and Team (Read) |
+| `boards-sprint-metrics` | 以 Analytics 計算 velocity、throughput、cycle／lead time 與未完成移轉 | 讀 | Analytics (Read)、Work Items (Read)、Project and Team (Read) |
+| `security-enablement-audit` | 列出尚未啟用 Advanced Security 或各項掃描功能的儲存庫 | 讀 | Advanced Security (Read)、Code (Read) |
+| `security-alert-review` | 列出與檢視 Advanced Security 警示（相依套件弱點、機密外洩、程式碼掃描） | 讀 | Advanced Security (Read)、Code (Read)、Project and Team (Read) |
+
+各稽核項目依據的官方最佳實踐與 REST API 查證紀錄，整理在 [`docs/research/azure-devops-best-practices.md`](docs/research/azure-devops-best-practices.md)。
 
 ---
 
@@ -53,7 +92,7 @@ npx skills add doggy8088/azure-devops-skills --list
 npx skills add doggy8088/azure-devops-skills --skill '*' -y
 
 # 只安裝部分 Skills
-npx skills add doggy8088/azure-devops-skills --skill boards-my-work boards-work-item-summary
+npx skills add doggy8088/azure-devops-skills --skill repos-pull-request-review boards-my-work pipelines-build-summary
 
 # 指定要安裝給哪些代理工具（例如 Claude Code、Codex、GitHub Copilot）
 npx skills add doggy8088/azure-devops-skills --agent claude-code codex github-copilot
@@ -82,7 +121,7 @@ npx skills remove    # 以互動方式移除
 
 以下是 Skills 執行時的需求（與安裝方式無關）：
 
-1. 安裝 `curl`（macOS、Linux 與 Windows 10 以上都已內建；在 Windows PowerShell 請呼叫 `curl.exe`）。
+1. 安裝 `curl`（macOS、Linux 與 Windows 10 以上都已內建；在 Windows PowerShell 請呼叫 `curl.exe`）。`repos-pull-request-review` 與 `repos-pull-request-write` 另需要 `git`。
 2. 到 `https://dev.azure.com/{organization}/_usersSettings/tokens` 建立 Personal Access Token（PAT），勾選上表所需的權限範圍。
 3. 在啟動 AI 代理的終端機設定環境變數：
 
@@ -119,6 +158,8 @@ export AZURE_DEVOPS_TOKEN="$(az account get-access-token --resource 499b84ac-132
    - 「摘要工作項目 115770」
    - 「Contoso 專案的 build 12345 為什麼失敗？」
    - 「給我 Contoso 專案 MyApp 儲存庫的安全性警示總覽」
+   - 「列出 Contoso 專案待我審查的 PR」
+   - 「檢查所有儲存庫的 main 分支原則是否符合最佳實踐」
 4. 代理會依 Skill 的 `description` 選出合適的 Skill，並依 `SKILL.md` 的步驟呼叫 REST API。
 
 ---
@@ -134,7 +175,7 @@ export AZURE_DEVOPS_TOKEN="$(az account get-access-token --resource 499b84ac-132
 4. **寫出 API 呼叫與流程**：
    - 沿用現有 Skills 的「連線與驗證」段落，並列出這個 Skill 需要的 PAT 權限範圍。
    - 針對每個常見任務，寫出要呼叫哪些 REST API、呼叫順序，以及結果如何呈現；每個呼叫附上可直接執行的 `curl` 範例。
-   - 寫入類操作（建立、指派、更新）先把變更內容列給使用者確認。
+   - 寫入類操作（建立、指派、更新）先把變更內容列給使用者確認；API 有乾跑機制（例如 `validateOnly`、`previewRun`）時先乾跑。
 5. **保持指示精簡、明確**：
    - 優先使用編號步驟與明確的判斷條件。
    - 寫清楚邊界情況（缺少專案或團隊、結果為空、錯誤回應）時代理該怎麼做。

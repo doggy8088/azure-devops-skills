@@ -1,6 +1,6 @@
 ---
 name: pipelines-build-summary
-description: 以 Azure DevOps REST API 列出、檢視與排查 Pipeline 建置：顯示某個 Pipeline 定義的近期建置、單一建置的狀態與結果、失敗步驟的記錄檔，以及建置包含的變更。當使用者問起建置清單、建置狀態、建置為何失敗或建置內含哪些 commit 時使用。
+description: 以 Azure DevOps REST API 列出、檢視與排查 Pipeline 建置：顯示某個 Pipeline 定義的近期建置、單一建置的狀態與結果、失敗步驟的記錄檔，以及建置包含的變更。當使用者問起建置清單、建置狀態、建置為何失敗或建置內含哪些 commit 時使用。要觸發 Pipeline 改用 `pipelines-run`，看自動化測試結果改用 `pipelines-test-results`，產生版本說明改用 `pipelines-release-notes`。
 compatibility: 需要 curl、可連線至 dev.azure.com 的網路，以及 AZURE_DEVOPS_ORG 與 AZURE_DEVOPS_PAT 環境變數。
 ---
 
@@ -40,8 +40,8 @@ compatibility: 需要 curl、可連線至 dev.azure.com 的網路，以及 AZURE
 - **權杖**：PAT 以 Basic 驗證送出：`-u ":$AZURE_DEVOPS_PAT"`；只設定了 `AZURE_DEVOPS_EXT_PAT`（Azure CLI azure-devops 擴充套件使用的變數）時，改用它。改用 Microsoft Entra ID 權杖時，換成 `-H "Authorization: Bearer $AZURE_DEVOPS_TOKEN"`。都未設定時，請使用者在自己的終端機設定 `AZURE_DEVOPS_PAT` 後重試，並停止。權杖只從環境變數讀取：不要請使用者把權杖貼進對話，也不要印出或寫入檔案。
 - **PAT 權限範圍**：Build (Read)、Project and Team (Read)。
 - **編碼**：路徑與查詢字串中的專案、Pipeline 名稱要 URL 編碼（空白寫成 `%20`）；查詢字串中的 `$` 寫成 `%24`（例如 `%24top`），避免被 shell 展開。
-- **錯誤**：HTTP 401、203 或回應是 HTML 登入頁，代表權杖無效、過期或權限不足，回報後停止；HTTP 404 代表組織、專案或建置 ID 有誤。
-- **Windows PowerShell**：呼叫 `curl.exe`（而非 `curl` 別名），環境變數寫成 `$env:AZURE_DEVOPS_PAT`。
+- **錯誤**：HTTP 401、403、203 或回應是 HTML 登入頁，代表權杖無效、過期或權限不足，回報後停止；HTTP 404 代表組織、專案或建置 ID 有誤。
+- **Windows PowerShell**：呼叫 `curl.exe`（而非 `curl` 別名），環境變數寫成 `$env:AZURE_DEVOPS_PAT`；PowerShell 不支援 `<<'EOF'`，先把 JSON 主體寫入暫存檔，再以 `--data-binary "@body.json"` 送出。
 
 ## 規則
 
